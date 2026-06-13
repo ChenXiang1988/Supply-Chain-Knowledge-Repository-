@@ -1,0 +1,103 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.0.3 Chrome/140.0.7339.249 Electron/38.7.0 Safari/537.36" version="29.0.3" pages="2">
+  <diagram name="概览" id="_Ol0smkiPySkeeks-5aX">
+    <mxGraphModel dx="1181" dy="778" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ABTm4TLaAvBeJtp7S-Hh-1" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;WMS Workflow&amp;nbsp;&lt;/h1&gt;&lt;p&gt;本文档用于记录西之月的仓储相关的业务流程，便于后续进行软件产品设计和相关的PRD文档的撰写；&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;注：&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;ol&gt;&lt;li&gt;在西之月定义的WMS是一个3PL的单仓执行系统，上游系统将明确的指令推送到本仓库，仓库按照指令进行执行；&lt;/li&gt;&lt;li&gt;本系统中需要考虑多货主的系统场景；&lt;/li&gt;&lt;li&gt;单据的结构设计分为三层：指令单据 - 作业节点单据 - 任务单据&lt;/li&gt;&lt;ol&gt;&lt;li&gt;指令单据：上游系统下发的明确的执行指令&lt;/li&gt;&lt;li&gt;作业节点单据：基于上游指令中明确的工序内容来进行作业排布，每个作业节点生成一张单据来进行此作业节点的运作情况承载；&lt;/li&gt;&lt;li&gt;任务单据：将作业节点拆解，便于团队协同的场景来进行明确到人的任务，还可以做任务排布，将仓库的效能逼向极致；&lt;/li&gt;&lt;/ol&gt;&lt;/ol&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="50" width="760" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-2" value="&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;西之月是一个工服贸一体的集团，拥有自己的原料采购渠道、生产工厂、存储仓库（国内存储仓、海外仓）、销售团队（toB、toC、一件代发），所以货品的流转很多时候是在产品生产前就确认了其流转的方式；&lt;/span&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="440" width="760" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-10" value="生产原料" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="nD_mObwDxyFYviZTP8SC-3" target="nD_mObwDxyFYviZTP8SC-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-16" value="生产原料" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.25;entryDx=0;entryDy=0;exitX=0.75;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="nD_mObwDxyFYviZTP8SC-3" target="nD_mObwDxyFYviZTP8SC-13">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="600" />
+              <mxPoint x="320" y="600" />
+              <mxPoint x="320" y="705" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-3" value="原料仓" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="525" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-14" value="包材" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="nD_mObwDxyFYviZTP8SC-4" target="nD_mObwDxyFYviZTP8SC-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-15" value="包材" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.25;entryDx=0;entryDy=0;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="nD_mObwDxyFYviZTP8SC-4" target="nD_mObwDxyFYviZTP8SC-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="390" y="640" />
+              <mxPoint x="250" y="640" />
+              <mxPoint x="250" y="705" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-4" value="物料仓" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="525" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-12" value="成品存储" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="nD_mObwDxyFYviZTP8SC-5" target="nD_mObwDxyFYviZTP8SC-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-5" value="工厂仓（内协）" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="690" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-18" value="头程" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="nD_mObwDxyFYviZTP8SC-6" target="nD_mObwDxyFYviZTP8SC-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-19" value="头程" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="nD_mObwDxyFYviZTP8SC-6" target="nD_mObwDxyFYviZTP8SC-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-20" value="头程" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="nD_mObwDxyFYviZTP8SC-6" target="nD_mObwDxyFYviZTP8SC-9">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="970" />
+              <mxPoint x="620" y="970" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-6" value="皓物仓" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="870" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-7" value="海外仓01" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1040" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-8" value="海外仓02" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="1040" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-9" value="海外仓N" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="1040" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-17" value="成品存储" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="nD_mObwDxyFYviZTP8SC-13" target="nD_mObwDxyFYviZTP8SC-6">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="420" y="810" />
+              <mxPoint x="170" y="810" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="nD_mObwDxyFYviZTP8SC-13" value="工厂仓（外协）" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="690" width="120" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="F11sUsXultUsxdh7yUCW" name="入库相关">
+    <mxGraphModel dx="1181" dy="778" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="JQ42pu3G-M6yKnbrvMz_-1" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;入库相关流程&lt;/h1&gt;&lt;p&gt;在西之月，仓库的入库收货要区分开，分为海外仓、皓物仓、工厂仓、物料仓四种场景，不同的场景对入库的要求是不同的；&lt;/p&gt;&lt;p&gt;&lt;/p&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="760" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="DBpdtO5fo5uarN-ISOIn-1" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;原料仓&lt;/h1&gt;&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.&lt;/p&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="160" width="760" height="120" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

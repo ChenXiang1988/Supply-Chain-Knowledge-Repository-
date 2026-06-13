@@ -1,0 +1,13 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.0.3 Chrome/140.0.7339.249 Electron/38.7.0 Safari/537.36" version="29.0.3">
+  <diagram name="第 1 页" id="_Ol0smkiPySkeeks-5aX">
+    <mxGraphModel dx="1181" dy="778" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ABTm4TLaAvBeJtp7S-Hh-1" value="&lt;h1 style=&quot;margin-top: 0px;&quot;&gt;WMS Workflow&amp;nbsp;&lt;/h1&gt;&lt;p&gt;本文档用于记录西之月的仓储相关的业务流程，便于后续进行软件产品设计和相关的PRD文档的撰写；&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;注：&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;ol&gt;&lt;li&gt;在西之月定义的WMS是一个3PL的单仓执行系统，上游系统将明确的指令推送到本仓库，仓库按照指令进行执行；&lt;/li&gt;&lt;li&gt;本系统中需要考虑多货主的系统场景；&lt;/li&gt;&lt;li&gt;单据的结构设计分为三层：指令单据 - 作业节点单据 - 任务单据&lt;/li&gt;&lt;ol&gt;&lt;li&gt;指令单据：上游系统下发的明确的执行指令&lt;/li&gt;&lt;li&gt;作业节点单据：基于上游指令中明确的工序内容来进行作业排布，每个作业节点生成一张单据来进行此作业节点的运作情况承载；&lt;/li&gt;&lt;li&gt;任务单据：将作业节点拆解，便于团队协同的场景来进行明确到人的任务，还可以做任务排布，将仓库的效能逼向极致；&lt;/li&gt;&lt;/ol&gt;&lt;/ol&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;" style="text;html=1;whiteSpace=wrap;overflow=hidden;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="50" width="760" height="350" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
