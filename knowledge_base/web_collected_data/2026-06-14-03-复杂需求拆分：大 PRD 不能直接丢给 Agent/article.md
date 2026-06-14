@@ -3,7 +3,7 @@ title: 03-复杂需求拆分：大 PRD 不能直接丢给 Agent
 author: 小丁聊AI
 date: 小丁聊AI
 source_url: https://mp.weixin.qq.com/s/aPHjfK8YvyBfxiZoCE-jtQ
-capture_time: 2026-06-14 02:09:35
+capture_time: 2026-06-14 08:54:01
 ---
 
  

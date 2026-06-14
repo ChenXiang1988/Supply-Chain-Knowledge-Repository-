@@ -3,7 +3,7 @@ title: 复杂 To B 系统里，我不再让 AI 直接写需求
 author: 产品经理学AI日记
 date: 黑黑
 source_url: https://mp.weixin.qq.com/s/Q5-Ortx_COOatx7-O8DO-g
-capture_time: 2026-06-14 02:09:32
+capture_time: 2026-06-14 08:53:58
 ---
 
 最近做需求的时候，我发现了一个挺实用的用法。
