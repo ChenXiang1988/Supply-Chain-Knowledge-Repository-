@@ -5,7 +5,7 @@
 ### 1. 安装依赖（首次使用）
 
 ```bash
-cd wx2md
+cd tools/wx2md
 
 # 安装 Python 依赖
 pip install -r requirements.txt
@@ -38,10 +38,10 @@ python wx2md.py
 
 ### 4. 查看结果
 
-生成的 Markdown 文件保存在上级 `web_collected_data/` 目录下：
+生成的 Markdown 文件保存在仓库根目录下的 `knowledge_base/web_collected_data/` 目录下：
 
 ```
-web_collected_data/
+knowledge_base/web_collected_data/
 ├── 2026-06-14-文章标题A/
 │   ├── article.md      ← 正文（Markdown 格式）
 │   └── images/         ← 文章中的图片
@@ -120,7 +120,7 @@ capture_time: 2026-06-14 00:35:00
 #### 1.2 依次执行下方两条命令
 在黑色窗口里，**复制一行、粘贴一行、按回车**执行：
 ```bash
-cd wx2md
+cd tools/wx2md
 # 安装 Python 依赖
 pip install -r requirements.txt
 # 安装 Playwright 浏览器（只需一次）
@@ -163,9 +163,9 @@ python wx2md.py
 3. 看到最后一行提示「全部任务执行完毕」，代表运行成功。
 
 ### 4. 查看结果
-生成的 Markdown 文件保存在上级 `web_collected_data/` 目录下：
+生成的 Markdown 文件保存在仓库根目录下的 `knowledge_base/web_collected_data/` 目录下：
 ```
-web_collected_data/
+knowledge_base/web_collected_data/
 ├── 2026-06-14-文章标题A/
 │   ├── article.md      ← 正文（Markdown 格式）
 │   └── images/         ← 文章中的图片
