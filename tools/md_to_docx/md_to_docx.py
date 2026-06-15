@@ -31,6 +31,7 @@ try:
     from bs4 import BeautifulSoup, NavigableString, Tag
     from docx import Document
     from docx.enum.style import WD_STYLE_TYPE
+    from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
     from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_COLOR_INDEX
     from docx.oxml import OxmlElement
     from docx.oxml.ns import qn
@@ -269,7 +270,10 @@ class MarkdownToDocx:
         section.footer_distance = Inches(0.35)
 
         self.page_width = section.page_width
-        self.usable_width = section.page_width - section.left_margin - section.right_margin
+        # python-docx 的宽度运算结果会退化成 int，这里统一按 EMU 整数处理。
+        self.usable_width = int(
+            section.page_width - section.left_margin - section.right_margin
+        )
 
         core = self.doc.core_properties
         core.title = self.source_path.stem
@@ -550,16 +554,18 @@ class MarkdownToDocx:
 
         table = self.doc.add_table(rows=len(rows), cols=col_count)
         table.style = "Table Grid"
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
         table.autofit = False
 
-        col_width = Inches(self.usable_width.inches / col_count)
-        for column in table.columns:
-            column.width = col_width
+        col_widths = self.calculate_table_column_widths(rows, col_count)
+        for column, width in zip(table.columns, col_widths):
+            column.width = width
 
         for row_idx, row in enumerate(rows):
             for col_idx in range(col_count):
                 cell = table.cell(row_idx, col_idx)
-                cell.width = col_width
+                cell.width = col_widths[col_idx]
+                cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.TOP
                 cell.text = ""
                 para = cell.paragraphs[0]
                 para.style = "Table Text"
@@ -576,6 +582,54 @@ class MarkdownToDocx:
                     set_cell_shading(cell, "EDEDED")
 
         self.doc.add_paragraph()
+
+    def calculate_table_column_widths(
+        self, rows: list[list[Tag]], col_count: int
+    ) -> list[int]:
+        if col_count <= 0:
+            return []
+
+        weights = [8] * col_count
+        for row in rows:
+            for col_idx in range(min(col_count, len(row))):
+                cell_node = row[col_idx]
+                text = normalize_text(self.collect_plain_text(cell_node.children))
+                if not text:
+                    weight = 8
+                else:
+                    lines = [line.strip() for line in text.splitlines() if line.strip()]
+                    if not lines:
+                        weight = 8
+                    else:
+                        weight = max(len(line) for line in lines)
+                        weight = min(max(weight, 8), 60)
+                weights[col_idx] = max(weights[col_idx], weight)
+
+        total_width = self.usable_width
+        min_width = int(Inches(0.9))
+        if col_count * min_width >= total_width:
+            base = total_width // col_count
+            widths = [base] * col_count
+            for idx in range(total_width - sum(widths)):
+                widths[idx % col_count] += 1
+            return widths
+
+        extra_width = total_width - (min_width * col_count)
+        total_weight = sum(weights) or col_count
+        widths = [
+            min_width + (extra_width * weight // total_weight)
+            for weight in weights
+        ]
+
+        remainder = total_width - sum(widths)
+        if remainder > 0:
+            for idx in sorted(range(col_count), key=lambda i: weights[i], reverse=True):
+                if remainder <= 0:
+                    break
+                widths[idx] += 1
+                remainder -= 1
+
+        return widths
 
     def extract_table_rows(self, node) -> list[list[Tag]]:
         rows: list[list[Tag]] = []
@@ -741,7 +795,7 @@ class MarkdownToDocx:
 
         try:
             shape = paragraph.add_run().add_picture(str(image_path))
-            max_width = int(self.usable_width)
+            max_width = self.get_available_image_width(paragraph)
             if shape.width > max_width:
                 scale = max_width / float(shape.width)
                 shape.width = max_width
@@ -749,6 +803,26 @@ class MarkdownToDocx:
         except Exception:
             alt = node.get("alt", "").strip() or src
             self.append_text(paragraph, f"[Image failed to load: {alt}]")
+
+    def get_available_image_width(self, paragraph) -> int:
+        parent = paragraph._p.getparent()
+        if hasattr(parent, "width"):
+            try:
+                width = int(parent.width)
+                if width > 0:
+                    return width
+            except Exception:
+                pass
+
+        available = self.usable_width
+        left_indent = paragraph.paragraph_format.left_indent
+        right_indent = paragraph.paragraph_format.right_indent
+        if left_indent is not None:
+            available -= int(left_indent)
+        if right_indent is not None:
+            available -= int(right_indent)
+
+        return max(available, int(Inches(1)))
 
 
 def main() -> int:
