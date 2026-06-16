@@ -6,12 +6,19 @@
 - `output_dir.txt`：Word 输出目录，一行一个路径，支持绝对路径或仓库相对路径
 - `processed_md_paths.txt`：已转换路径记录，脚本自动维护
 - `requirements.txt`：Python 依赖清单
+- `package.json` / `package-lock.json`：本地 Mermaid 渲染依赖（`@mermaid-js/mermaid-cli`、`sharp`）
 - `md_to_docx.py`：转换脚本
 
 ## 依赖
 
 ```bash
 python3 -m pip install -r requirements.txt
+```
+
+再进入 `tools/md_to_docx` 执行：
+
+```bash
+npm install
 ```
 
 ## 用法
@@ -50,6 +57,8 @@ python tools/md_to_docx/md_to_docx.py
 - Markdown 中的相对路径图片会按输入文件所在目录解析
 - 例如 `![图](images/a.png)`
 - 远程图片链接会保留为文本提示，不会自动下载
+- Markdown 里的 HTML 注释块（`<!-- ... -->`）会被忽略，不会写入 Word
+- Mermaid 代码块会先渲染成图片，再写入 Word
 
 ## 注意事项
 

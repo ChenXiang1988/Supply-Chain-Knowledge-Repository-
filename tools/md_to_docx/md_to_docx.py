@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 """
-Batch convert Markdown files to Word .docx documents.
+批量将 Markdown 文件转换为 Word `.docx` 文档。
 
-Files:
+相关文件：
   - md_paths.txt
   - output_dir.txt
   - processed_md_paths.txt
 
-Dependencies:
+依赖安装：
   python3 -m pip install -r requirements.txt
 
-Usage:
+使用方式：
   python tools/md_to_docx/md_to_docx.py
 
-Each non-empty line in md_paths.txt is treated as one Markdown file path.
-Lines starting with # are ignored. The output directory is read from
-output_dir.txt and is created automatically if needed.
+`md_paths.txt` 中每一行非空内容都会被当作一个 Markdown 路径。
+以 `#` 开头的行会被忽略。输出目录从 `output_dir.txt` 读取，
+如果目录不存在会自动创建。
 """
 
 from __future__ import annotations
@@ -23,12 +23,14 @@ from __future__ import annotations
 import os
 import re
 import sys
+import subprocess
+import tempfile
 from pathlib import Path
 from typing import Iterable
 
 try:
     import markdown
-    from bs4 import BeautifulSoup, NavigableString, Tag
+    from bs4 import BeautifulSoup, Comment, NavigableString, Tag
     from docx import Document
     from docx.enum.style import WD_STYLE_TYPE
     from docx.enum.table import WD_TABLE_ALIGNMENT, WD_CELL_VERTICAL_ALIGNMENT
@@ -270,7 +272,7 @@ class MarkdownToDocx:
         section.footer_distance = Inches(0.35)
 
         self.page_width = section.page_width
-        # python-docx 的宽度运算结果会退化成 int，这里统一按 EMU 整数处理。
+        # python-docx 计算宽度时会退化成 int，这里统一按 EMU 整数处理。
         self.usable_width = int(
             section.page_width - section.left_margin - section.right_margin
         )
@@ -347,7 +349,13 @@ class MarkdownToDocx:
     def convert(self, markdown_text: str) -> None:
         html = markdown.markdown(markdown_text, extensions=["extra"])
         soup = BeautifulSoup(html, "html.parser")
+        self.remove_html_comments(soup)
         self.render_container(soup.contents, list_level=0)
+
+    def remove_html_comments(self, soup: BeautifulSoup) -> None:
+        # Markdown 里常用 HTML 注释块来“临时注释掉”内容，导出前要先清理掉。
+        for comment in soup.find_all(string=lambda text: isinstance(text, Comment)):
+            comment.extract()
 
     def save(self) -> Path:
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -422,7 +430,7 @@ class MarkdownToDocx:
             self.render_container(node.children, list_level=list_level)
             return
 
-        # Fallback: recurse into children to avoid dropping content.
+        # 兜底处理：继续向下递归，尽量不要把未覆盖的节点直接丢掉。
         self.render_container(node.children, list_level=list_level)
 
     def render_paragraph(self, node) -> None:
@@ -448,7 +456,6 @@ class MarkdownToDocx:
         self.append_text(paragraph, text)
 
     def render_code_block(self, node) -> None:
-        code = ""
         code_tag = node.find("code")
         if code_tag is not None:
             code = code_tag.get_text()
@@ -458,15 +465,97 @@ class MarkdownToDocx:
         if not code.strip():
             return
 
+        if self.is_mermaid_code_block(code_tag):
+            # Mermaid 代码块要先渲染成图片，再插入 Word。
+            self.render_mermaid_block(code)
+            return
+
         paragraph = self.doc.add_paragraph(style="Code Block")
         run = paragraph.add_run(code)
         set_run_font(run, self.mono_font, self.east_asia_font, size=9.5)
 
-        # Add light shading to make code blocks easier to scan.
+        # 给代码块加一点浅灰底，方便快速扫读。
         p_pr = paragraph._p.get_or_add_pPr()
         shd = OxmlElement("w:shd")
         shd.set(qn("w:fill"), "F6F8FA")
         p_pr.append(shd)
+
+    def is_mermaid_code_block(self, code_tag) -> bool:
+        if code_tag is None:
+            return False
+
+        classes = code_tag.get("class", [])
+        if isinstance(classes, str):
+            classes = [classes]
+
+        return any(
+            cls == "language-mermaid" or cls == "mermaid" for cls in classes
+        )
+
+    def render_mermaid_block(self, code: str) -> None:
+        with tempfile.TemporaryDirectory(prefix="md_to_docx_mermaid_") as tmp_dir:
+            tmp_path = Path(tmp_dir)
+            input_path = tmp_path / "diagram.mmd"
+            output_path = tmp_path / "diagram.png"
+            # 先写入临时文件，再交给本地渲染器生成 PNG。
+            input_path.write_text(code + "\n", encoding="utf-8")
+            self.render_mermaid_image(input_path, output_path)
+
+            paragraph = self.doc.add_paragraph()
+            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            self.insert_local_image(paragraph, output_path, alt_text="Mermaid diagram")
+
+    def render_mermaid_image(self, input_path: Path, output_path: Path) -> None:
+        renderer_path = self.mermaid_renderer_path()
+        command = [
+            "node",
+            str(renderer_path),
+            str(input_path),
+            str(output_path),
+        ]
+
+        try:
+            # 调用本地 Node 渲染器，把 Mermaid 源码转成图片文件。
+            subprocess.run(
+                command,
+                check=True,
+                capture_output=True,
+                text=True,
+                cwd=str(BASE_DIR),
+            )
+        except FileNotFoundError as exc:
+            raise FileNotFoundError(
+                "Missing Node.js or Mermaid renderer. Run `npm install` in tools/md_to_docx first."
+            ) from exc
+        except subprocess.CalledProcessError as exc:
+            message = (exc.stderr or exc.stdout or str(exc)).strip()
+            raise RuntimeError(f"Mermaid render failed: {message}") from exc
+
+        if not output_path.exists() or output_path.stat().st_size == 0:
+            raise RuntimeError("Mermaid render did not produce an image.")
+
+    def mermaid_renderer_path(self) -> Path:
+        # 这里固定使用仓库内的本地渲染脚本，避免依赖全局环境。
+        renderer = BASE_DIR / "render_mermaid.mjs"
+        if renderer.exists():
+            return renderer
+        raise FileNotFoundError(renderer)
+
+    def insert_local_image(self, paragraph, image_path: Path, *, alt_text: str) -> None:
+        if not image_path.exists():
+            paragraph.add_run(f"[Missing image: {alt_text}]")
+            return
+
+        try:
+            shape = paragraph.add_run().add_picture(str(image_path))
+            # 图片过宽时自动缩放到页面可用宽度内。
+            max_width = self.get_available_image_width(paragraph)
+            if shape.width > max_width:
+                scale = max_width / float(shape.width)
+                shape.width = max_width
+                shape.height = int(shape.height * scale)
+        except Exception:
+            paragraph.add_run(f"[Image failed to load: {alt_text}]")
 
     def render_list(self, node, list_level: int) -> None:
         ordered = node.name.lower() == "ol"
@@ -477,7 +566,7 @@ class MarkdownToDocx:
             if text:
                 paragraph = self.doc.add_paragraph(style=self.list_style_name(ordered, list_level))
                 if ordered:
-                    # Word numbering styles handle numbering automatically.
+                    # 有序列表的编号交给 Word 自己处理。
                     pass
                 self.render_inline_children(head_nodes, paragraph)
             else:
@@ -576,7 +665,7 @@ class MarkdownToDocx:
                 cell_node = row[col_idx]
                 self.render_inline_children(cell_node.children, para)
                 if row_idx == 0 and cell_node.name.lower() in {"th", "td"}:
-                    # Header-like row.
+                    # 第一行按表头样式处理。
                     for run in para.runs:
                         run.bold = True
                     set_cell_shading(cell, "EDEDED")
@@ -589,6 +678,7 @@ class MarkdownToDocx:
         if col_count <= 0:
             return []
 
+        # 按单元格内容长度给列分配权重，尽量让宽列留给长文本。
         weights = [8] * col_count
         for row in rows:
             for col_idx in range(min(col_count, len(row))):
@@ -713,6 +803,7 @@ class MarkdownToDocx:
         if not text:
             return
 
+        # 先把 URL 切出来，保证普通文本和超链接都能保持原样输出。
         parts = []
         last = 0
         for match in URL_RE.finditer(text):
@@ -793,16 +884,7 @@ class MarkdownToDocx:
             self.append_text(paragraph, f"[Missing image: {alt}]")
             return
 
-        try:
-            shape = paragraph.add_run().add_picture(str(image_path))
-            max_width = self.get_available_image_width(paragraph)
-            if shape.width > max_width:
-                scale = max_width / float(shape.width)
-                shape.width = max_width
-                shape.height = int(shape.height * scale)
-        except Exception:
-            alt = node.get("alt", "").strip() or src
-            self.append_text(paragraph, f"[Image failed to load: {alt}]")
+        self.insert_local_image(paragraph, image_path, alt_text=node.get("alt", "").strip() or src)
 
     def get_available_image_width(self, paragraph) -> int:
         parent = paragraph._p.getparent()
@@ -857,6 +939,7 @@ def main() -> int:
         return 1
     output_dir = clean_user_path(output_dir_lines[0])
 
+    # 先读取历史处理记录，后面可以直接跳过已成功转换过的文件。
     processed_paths = load_processed_paths()
     pending_paths: list[Path] = []
     skipped_count = 0
@@ -896,6 +979,7 @@ def main() -> int:
             markdown_text = converter.load_markdown()
             converter.convert(markdown_text)
             out_path = converter.save()
+            # 成功后立即写入处理记录，避免下次重复转换。
             append_processed_path(source_path)
             processed_paths.add(str(source_path))
             converted_count += 1
