@@ -739,10 +739,11 @@
         <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>基础配置</span></div><span>⌄</span></div>
         <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>入库</span></div><span>⌃</span></div>
         <div class="nav-sublist">
-          <div class="nav-subitem"><div class="nav-subitem-label"><span>到货签收单</span></div></div>
-          <div class="nav-subitem active"><div class="nav-subitem-label"><span>质检管理</span></div></div>
-          <div class="nav-subitem"><div class="nav-subitem-label"><span>入库单</span></div></div>
-          <div class="nav-subitem"><div class="nav-subitem-label"><span>上架单</span></div></div>
+          <div class="nav-subitem" data-go="receipt"><div class="nav-subitem-label"><span>到货签收单</span></div></div>
+          <div class="nav-subitem active" data-go="quality"><div class="nav-subitem-label"><span>质检管理</span></div></div>
+          <div class="nav-subitem" data-go="putaway"><div class="nav-subitem-label"><span>上架单</span></div></div>
+          <div class="nav-subitem" data-go="exception"><div class="nav-subitem-label"><span>异常待处理</span></div></div>
+          <div class="nav-subitem" data-go="config"><div class="nav-subitem-label"><span>售后入库配置</span></div></div>
         </div>
         <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>出库</span></div><span>⌄</span></div>
         <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>库存中心</span></div><span>⌄</span></div>
@@ -759,8 +760,9 @@
     <main class="main">
       <header class="topbar">
         <div class="top-tabs">
-          <div class="chrome-tab">☰<span>数据看板</span><span>×</span></div>
-          <div class="chrome-tab active"><span>质检管理</span><span>×</span></div>
+          <div class="chrome-tab" data-go="receipt"><span>到货签收单</span><span>×</span></div>
+          <div class="chrome-tab active" data-go="quality"><span>质检管理</span><span>×</span></div>
+          <div class="chrome-tab" data-go="putaway"><span>上架单</span><span>×</span></div>
         </div>
         <div class="topbar-actions">
           <select class="ghost-select">
@@ -806,9 +808,10 @@
               <button class="btn strong" id="submitBtn">提交质检</button>
               <button class="btn" data-modal="newInspection">新建质检单</button>
               <button class="btn" data-modal="split">分段拆分</button>
-              <button class="btn" data-modal="exception">查看异常</button>
+              <button class="btn" data-go="exception">查看异常</button>
             </div>
             <div class="toolbar-right">
+              <button class="btn" data-go="config">查看配置</button>
               <button class="btn">导出</button>
             </div>
           </div>
@@ -907,6 +910,7 @@
     </div>
   </section>
 
+  <script src="./prototype-nav.js"></script>
   <script>
     const rows = [
       {
@@ -1203,6 +1207,8 @@
           <td>${row.updatedAt}</td>
           <td>
             <a class="cell-link detail-link" data-id="${row.id}">详情</a>
+            &nbsp;|&nbsp;
+            <a class="cell-link" data-go="putaway">查看上架单</a>
             &nbsp;|&nbsp;
             <a class="cell-link" data-modal="entry">录入质检</a>
             &nbsp;|&nbsp;

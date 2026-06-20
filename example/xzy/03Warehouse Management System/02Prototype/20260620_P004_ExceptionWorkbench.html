@@ -775,17 +775,20 @@
           <span>︿</span>
         </div>
         <div class="nav-sublist">
-          <div class="nav-subitem">
+          <div class="nav-subitem" data-go="receipt">
             <span class="nav-subitem-label">到货通知单</span>
           </div>
-          <div class="nav-subitem">
+          <div class="nav-subitem" data-go="quality">
             <span class="nav-subitem-label">质检管理</span>
           </div>
-          <div class="nav-subitem">
+          <div class="nav-subitem" data-go="putaway">
             <span class="nav-subitem-label">上架单</span>
           </div>
-          <div class="nav-subitem active">
+          <div class="nav-subitem active" data-go="exception">
             <span class="nav-subitem-label">异常待处理</span>
+          </div>
+          <div class="nav-subitem" data-go="config">
+            <span class="nav-subitem-label">售后入库配置</span>
           </div>
         </div>
         <div class="nav-item">
@@ -808,9 +811,10 @@
     <main class="main">
       <div class="topbar">
         <div class="top-tabs">
-          <div class="chrome-tab">数据看板 ×</div>
-          <div class="chrome-tab">到货签收单 ×</div>
-          <div class="chrome-tab active">异常待处理工作台 ×</div>
+          <div class="chrome-tab" data-go="receipt">到货签收单 ×</div>
+          <div class="chrome-tab" data-go="quality">质检管理 ×</div>
+          <div class="chrome-tab active" data-go="exception">异常待处理工作台 ×</div>
+          <div class="chrome-tab" data-go="config">售后入库配置 ×</div>
         </div>
         <div class="topbar-actions">
           <select class="ghost-select">
@@ -884,6 +888,7 @@
               <button id="retryBtn" class="btn">重新匹配</button>
             </div>
             <div class="toolbar-right">
+              <button class="btn" data-go="config">查看配置</button>
               <button id="searchBtn" class="btn primary">查询</button>
               <button id="resetBtn" class="btn">重置</button>
               <button class="btn">导出</button>
@@ -978,6 +983,7 @@
     </div>
   </div>
 
+  <script src="./prototype-nav.js"></script>
   <script>
     const tabs = [
       { key: "all", label: "全部" },
@@ -1266,6 +1272,8 @@
             <a class="cell-link" data-action="investigate" data-id="${row.id}">补查</a>
             &nbsp;|&nbsp;
             <a class="cell-link" data-action="bind" data-id="${row.id}">补关联</a>
+            &nbsp;|&nbsp;
+            <a class="cell-link" data-go="receipt">返回签收单</a>
           </td>
         </tr>
       `).join("");

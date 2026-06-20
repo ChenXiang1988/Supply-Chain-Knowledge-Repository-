@@ -799,17 +799,20 @@
           <span>︿</span>
         </div>
         <div class="nav-sublist">
-          <div class="nav-subitem">
+          <div class="nav-subitem" data-go="receipt">
             <span class="nav-subitem-label">到货通知单</span>
           </div>
-          <div class="nav-subitem">
+          <div class="nav-subitem" data-go="quality">
             <span class="nav-subitem-label">质检管理</span>
           </div>
-          <div class="nav-subitem active">
+          <div class="nav-subitem active" data-go="putaway">
             <span class="nav-subitem-label">上架单</span>
           </div>
-          <div class="nav-subitem">
+          <div class="nav-subitem" data-go="exception">
             <span class="nav-subitem-label">异常待处理</span>
+          </div>
+          <div class="nav-subitem" data-go="config">
+            <span class="nav-subitem-label">售后入库配置</span>
           </div>
         </div>
         <div class="nav-item">
@@ -832,9 +835,10 @@
     <main class="main">
       <div class="topbar">
         <div class="top-tabs">
-          <div class="chrome-tab">数据看板 ×</div>
-          <div class="chrome-tab">质检入库单 ×</div>
-          <div class="chrome-tab active">上架单工作台 ×</div>
+          <div class="chrome-tab" data-go="receipt">到货签收单 ×</div>
+          <div class="chrome-tab" data-go="quality">质检入库单 ×</div>
+          <div class="chrome-tab active" data-go="putaway">上架单工作台 ×</div>
+          <div class="chrome-tab" data-go="exception">异常待处理 ×</div>
         </div>
         <div class="topbar-actions">
           <select class="ghost-select">
@@ -889,10 +893,11 @@
             <div class="toolbar-left">
               <button id="claimBtn" class="btn strong" data-modal="claim">领取上架单</button>
               <button id="confirmBtn" class="btn primary">确认上架</button>
-              <button id="viewQcBtn" class="btn" data-modal="quality">查看质检</button>
+              <button id="viewQcBtn" class="btn" data-go="quality">查看质检</button>
               <button id="slotBtn" class="btn" data-modal="slot">扫码库位</button>
             </div>
             <div class="toolbar-right">
+              <button class="btn" data-go="exception">查看异常</button>
               <button id="searchBtn" class="btn primary">查询</button>
               <button id="resetBtn" class="btn">重置</button>
               <button class="btn">导出</button>
@@ -989,6 +994,7 @@
     </div>
   </div>
 
+  <script src="./prototype-nav.js"></script>
   <script>
     const tabs = [
       { key: "all", label: "全部" },
@@ -1305,7 +1311,7 @@
         <tr class="${selectedRowId === row.id ? "selected" : ""}">
           <td class="checkbox-cell"><input class="checkbox row-check" type="checkbox" data-id="${row.id}" ${selectedRowId === row.id ? "checked" : ""} /></td>
           <td><a class="cell-link detail-link" data-id="${row.id}">${row.id}</a></td>
-          <td><a class="cell-link" data-modal="quality">${row.qcId}</a></td>
+          <td><a class="cell-link" data-go="quality">${row.qcId}</a></td>
           <td>${row.receiptId}</td>
           <td>${row.sku}</td>
           <td>${row.qty}</td>
@@ -1515,7 +1521,6 @@
     });
 
     document.getElementById("claimBtn").addEventListener("click", () => openModal("claim"));
-    document.getElementById("viewQcBtn").addEventListener("click", () => openModal("quality"));
     document.getElementById("slotBtn").addEventListener("click", () => openModal("slot"));
     document.getElementById("confirmBtn").addEventListener("click", () => {
       const row = rows.find((item) => item.id === selectedRowId) || rows[0];

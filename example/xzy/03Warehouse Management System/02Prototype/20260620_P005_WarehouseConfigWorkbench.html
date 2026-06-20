@@ -798,13 +798,27 @@
           <span>︿</span>
         </div>
         <div class="nav-sublist">
-          <div class="nav-subitem active">
+          <div class="nav-subitem active" data-go="config">
             <span class="nav-subitem-label">售后入库配置</span>
           </div>
         </div>
         <div class="nav-item">
           <span class="nav-item-label"><span class="nav-dot"></span>入库</span>
-          <span>﹀</span>
+          <span>︿</span>
+        </div>
+        <div class="nav-sublist">
+          <div class="nav-subitem" data-go="receipt">
+            <span class="nav-subitem-label">到货签收单</span>
+          </div>
+          <div class="nav-subitem" data-go="quality">
+            <span class="nav-subitem-label">质检管理</span>
+          </div>
+          <div class="nav-subitem" data-go="putaway">
+            <span class="nav-subitem-label">上架单</span>
+          </div>
+          <div class="nav-subitem" data-go="exception">
+            <span class="nav-subitem-label">异常待处理</span>
+          </div>
         </div>
         <div class="nav-item">
           <span class="nav-item-label"><span class="nav-dot"></span>库存中心</span>
@@ -822,9 +836,10 @@
     <main class="main">
       <div class="topbar">
         <div class="top-tabs">
-          <div class="chrome-tab">数据看板 ×</div>
-          <div class="chrome-tab">异常待处理 ×</div>
-          <div class="chrome-tab active">仓库级售后入库配置 ×</div>
+          <div class="chrome-tab" data-go="receipt">到货签收单 ×</div>
+          <div class="chrome-tab" data-go="quality">质检管理 ×</div>
+          <div class="chrome-tab" data-go="exception">异常待处理 ×</div>
+          <div class="chrome-tab active" data-go="config">仓库级售后入库配置 ×</div>
         </div>
         <div class="topbar-actions">
           <select class="ghost-select">
@@ -877,6 +892,8 @@
               <button id="saveBtn" class="btn green">保存</button>
               <button id="toggleBtn" class="btn gray" data-modal="toggle">启用 / 停用</button>
               <button id="logBtn" class="btn" data-modal="log">查看变更记录</button>
+              <button class="btn" data-go="receipt">查看签收页</button>
+              <button class="btn" data-go="quality">查看质检页</button>
             </div>
             <div class="toolbar-right">
               <button id="searchBtn" class="btn primary">查询</button>
@@ -969,6 +986,7 @@
     </div>
   </div>
 
+  <script src="./prototype-nav.js"></script>
   <script>
     const tabs = [
       { key: "all", label: "全部" },

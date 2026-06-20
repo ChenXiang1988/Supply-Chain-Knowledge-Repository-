@@ -856,8 +856,10 @@
               <button class="btn" data-modal="new">新建签收单</button>
               <button class="btn" data-modal="relation">批量补关联</button>
               <button class="btn" data-modal="exception">标记异常</button>
+              <button class="btn" data-go="exception">查看异常</button>
             </div>
             <div class="toolbar-right">
+              <button class="btn" data-go="config">查看配置</button>
               <button class="btn">另存为快捷查询</button>
             </div>
           </div>
@@ -955,6 +957,7 @@
     </div>
   </section>
 
+  <script src="./prototype-nav.js"></script>
   <script>
     const rows = [
       {
@@ -1213,6 +1216,8 @@
           <td>${row.updatedAt}</td>
           <td>
             <a class="cell-link detail-link" data-id="${row.id}">详情</a>
+            &nbsp;|&nbsp;
+            <a class="cell-link" data-go="quality">进入质检</a>
             &nbsp;|&nbsp;
             <a class="cell-link" data-modal="relation">补关联</a>
             &nbsp;|&nbsp;
