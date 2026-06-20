@@ -1,6 +1,6 @@
 # 3PL 平台主流程泳道图
 
-状态：草案  
+状态：草案（**试点范围已更新为 V2**，见 [泓湖 3PL 试点主干流程](./2026-06-20-3pl-core-flow-v2.md)）  
 日期：2026-06-17  
 关联蓝图：`docs/superpowers/specs/2026-06-17-global-3pl-platform-blueprint-design.md`
 
