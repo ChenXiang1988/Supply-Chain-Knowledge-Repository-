@@ -1,0 +1,1351 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>xyWMS 售后到货入库原型 - 到货签收单工作台</title>
+  <style>
+    :root {
+      --nav-bg: #23254b;
+      --nav-bg-2: #1d2041;
+      --nav-active: #2e5bff;
+      --nav-active-soft: #2b3d74;
+      --page-bg: #f5f7fb;
+      --card-bg: #ffffff;
+      --line: #e4eaf3;
+      --line-2: #d7dfec;
+      --text: #1f2a44;
+      --muted: #7b8798;
+      --blue: #2f7df6;
+      --blue-deep: #2f5eff;
+      --green: #62c654;
+      --green-text: #30a142;
+      --orange: #ff9f43;
+      --red: #f15b6c;
+      --shadow: 0 10px 28px rgba(20, 37, 63, 0.08);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background: var(--page-bg);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 176px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, var(--nav-bg) 0%, var(--nav-bg-2) 100%);
+      color: rgba(255, 255, 255, 0.86);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .brand {
+      height: 66px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .brand-mark {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      background: linear-gradient(180deg, #3dd8ff 0%, #276bff 100%);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+    }
+
+    .nav-group {
+      padding-top: 10px;
+    }
+
+    .nav-item,
+    .nav-subitem {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      font-size: 14px;
+      cursor: default;
+    }
+
+    .nav-item {
+      color: rgba(255, 255, 255, 0.84);
+    }
+
+    .nav-item-label,
+    .nav-subitem-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      opacity: 0.9;
+    }
+
+    .nav-sublist {
+      background: rgba(13, 17, 34, 0.14);
+    }
+
+    .nav-subitem {
+      padding-left: 48px;
+      color: rgba(255, 255, 255, 0.74);
+    }
+
+    .nav-subitem.active {
+      background: var(--nav-active-soft);
+      color: #ffffff;
+      box-shadow: inset 3px 0 0 var(--nav-active);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px 12px;
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 12px;
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .topbar {
+      height: 44px;
+      background: #f0f0f0;
+      border-bottom: 1px solid #e6e6e6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px 0 10px;
+      gap: 12px;
+    }
+
+    .top-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .chrome-tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 34px;
+      padding: 0 14px;
+      border-radius: 8px 8px 0 0;
+      background: #e5e5e5;
+      color: #6a7380;
+      font-size: 14px;
+    }
+
+    .chrome-tab.active {
+      background: #ffffff;
+      color: var(--text);
+      box-shadow: 0 -1px 0 #ffffff, 0 0 0 1px #e6e6e6;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .ghost-select {
+      min-width: 108px;
+      height: 28px;
+      border: 1px solid #d8d8d8;
+      background: #ffffff;
+      border-radius: 4px;
+      padding: 0 10px;
+      color: #444;
+    }
+
+    .user-label {
+      color: #555;
+      font-size: 13px;
+    }
+
+    .workspace {
+      padding: 12px 18px 20px;
+      min-width: 0;
+    }
+
+    .status-tabs {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 8px;
+    }
+
+    .status-tab {
+      position: relative;
+      min-width: 74px;
+      height: 30px;
+      border: 1px solid #d8dee8;
+      border-right: 0;
+      background: #fafbfd;
+      color: #3c4858;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .status-tab:last-child {
+      border-right: 1px solid #d8dee8;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .status-tab:first-child {
+      border-radius: 4px 0 0 4px;
+    }
+
+    .status-tab.active {
+      background: var(--blue);
+      color: #ffffff;
+      border-color: var(--blue);
+      z-index: 1;
+    }
+
+    .status-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      background: #ff5d5d;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 11px;
+      line-height: 18px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(255, 93, 93, 0.3);
+    }
+
+    .filter-card,
+    .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .filter-card {
+      padding: 12px 18px 16px;
+    }
+
+    .filter-head {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-bottom: 12px;
+      color: #555;
+      font-size: 13px;
+      gap: 8px;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 10px;
+      align-items: center;
+    }
+
+    .field {
+      height: 30px;
+      border: 1px solid var(--line-2);
+      border-radius: 4px;
+      padding: 0 12px;
+      background: #ffffff;
+      color: #4a5568;
+      min-width: 0;
+    }
+
+    .field::placeholder {
+      color: #b3bac5;
+    }
+
+    .date-range {
+      grid-column: span 2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .date-range .field {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .toolbar {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      height: 30px;
+      border-radius: 4px;
+      border: 1px solid var(--line-2);
+      background: #ffffff;
+      color: #3c4858;
+      padding: 0 16px;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #ffffff;
+    }
+
+    .btn.strong {
+      background: var(--blue-deep);
+      border-color: var(--blue-deep);
+      color: #ffffff;
+    }
+
+    .collapse-row {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: var(--blue);
+      font-size: 12px;
+    }
+
+    .collapse-line {
+      flex: 1;
+      height: 2px;
+      background: #b8d1ff;
+    }
+
+    .collapse-pill {
+      min-width: 60px;
+      height: 26px;
+      border: 0;
+      border-radius: 14px;
+      background: var(--blue);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .table-card {
+      margin-top: 20px;
+      overflow: hidden;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1320px;
+    }
+
+    thead th {
+      height: 40px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      color: #5c6675;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: left;
+      padding: 0 10px;
+      white-space: nowrap;
+    }
+
+    tbody td {
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      padding: 8px 10px;
+      font-size: 13px;
+      vertical-align: top;
+      background: #ffffff;
+    }
+
+    tbody tr:hover td {
+      background: #f7fbff;
+    }
+
+    tbody tr.selected td {
+      background: #f1f7ff;
+    }
+
+    .cell-link {
+      color: #1f6fff;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .cell-link:hover {
+      text-decoration: underline;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 0 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 20px;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+
+    .tag.green {
+      color: var(--green-text);
+      background: #f2fff0;
+      border-color: #b7ebb0;
+    }
+
+    .tag.orange {
+      color: #d48806;
+      background: #fff7e8;
+      border-color: #ffd591;
+    }
+
+    .tag.red {
+      color: #cf1322;
+      background: #fff1f0;
+      border-color: #ffa39e;
+    }
+
+    .tag.blue {
+      color: #1d5fd0;
+      background: #edf5ff;
+      border-color: #b9d6ff;
+    }
+
+    .checkbox-cell {
+      width: 34px;
+      text-align: center;
+    }
+
+    .checkbox {
+      width: 16px;
+      height: 16px;
+      border: 1px solid #d3dce8;
+      border-radius: 2px;
+      appearance: none;
+      background: #fff;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .checkbox:checked {
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .checkbox:checked::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 1px;
+      width: 4px;
+      height: 8px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 12px;
+      font-size: 13px;
+      color: #4e5969;
+      background: #ffffff;
+    }
+
+    .pagination-left,
+    .pagination-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-chip {
+      min-width: 22px;
+      height: 22px;
+      border: 1px solid #2f7df6;
+      border-radius: 4px;
+      color: #2f7df6;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+    }
+
+    .summary-strip {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .summary-card {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 16px;
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .summary-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .summary-sub {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #6e7a8b;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(16, 24, 40, 0.32);
+      display: none;
+      z-index: 20;
+    }
+
+    .overlay.show {
+      display: block;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 420px;
+      height: 100vh;
+      background: #ffffff;
+      box-shadow: -12px 0 30px rgba(15, 23, 42, 0.16);
+      transform: translateX(100%);
+      transition: transform 0.24s ease;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .drawer.show {
+      transform: translateX(0);
+    }
+
+    .drawer-head,
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+    }
+
+    .drawer-body {
+      padding: 18px;
+      overflow: auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 12px;
+    }
+
+    .detail-item {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fafbfd;
+    }
+
+    .detail-item strong {
+      display: block;
+      font-size: 12px;
+      color: #7c8797;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .timeline {
+      border-left: 2px solid #d8e2f0;
+      padding-left: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .timeline-item {
+      position: relative;
+      font-size: 13px;
+      color: #536172;
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: -20px;
+      top: 6px;
+      width: 8px;
+      height: 8px;
+      background: var(--blue);
+      border-radius: 50%;
+    }
+
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 560px;
+      max-width: calc(100vw - 32px);
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+      transform: translate(-50%, -46%);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.22s ease;
+      z-index: 40;
+    }
+
+    .modal.show {
+      transform: translate(-50%, -50%);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-body {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .modal-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .modal-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .modal-label {
+      font-size: 12px;
+      color: #6e7a8b;
+    }
+
+    .modal-field input,
+    .modal-field select,
+    .modal-field textarea {
+      width: 100%;
+      border: 1px solid var(--line-2);
+      border-radius: 4px;
+      padding: 8px 10px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .modal-field textarea {
+      min-height: 76px;
+      resize: vertical;
+    }
+
+    .modal-foot {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 14px 18px 18px;
+    }
+
+    .icon-btn {
+      border: 0;
+      background: transparent;
+      color: #7c8797;
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 1360px) {
+      .filter-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .summary-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 980px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .date-range {
+        grid-column: span 2;
+      }
+
+      .summary-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .drawer {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div>WMS系统</div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>作业策略</span></div><span>⌄</span></div>
+        <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>规则管理</span></div><span>⌄</span></div>
+        <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>首页</span></div><span>⌄</span></div>
+        <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>基础数据</span></div><span>⌄</span></div>
+        <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>基础配置</span></div><span>⌄</span></div>
+        <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>入库</span></div><span>⌃</span></div>
+        <div class="nav-sublist">
+          <div class="nav-subitem active" data-go="receipt"><div class="nav-subitem-label"><span>到货签收单</span></div></div>
+          <div class="nav-subitem" data-go="quality"><div class="nav-subitem-label"><span>质检管理</span></div></div>
+          <div class="nav-subitem" data-go="putaway"><div class="nav-subitem-label"><span>上架单</span></div></div>
+          <div class="nav-subitem" data-go="exception"><div class="nav-subitem-label"><span>异常待处理</span></div></div>
+          <div class="nav-subitem" data-go="config"><div class="nav-subitem-label"><span>售后入库配置</span></div></div>
+        </div>
+        <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>出库</span></div><span>⌄</span></div>
+        <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>库存中心</span></div><span>⌄</span></div>
+        <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>退货单</span></div><span>⌄</span></div>
+        <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>库内管理</span></div><span>⌄</span></div>
+        <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>打印管理</span></div><span>⌄</span></div>
+        <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>下载管理</span></div><span>⌄</span></div>
+        <div class="nav-item"><div class="nav-item-label"><span class="nav-dot"></span><span>系统管理</span></div><span>⌄</span></div>
+      </div>
+
+      <div class="sidebar-footer">版本号：v10.0.2025.0214</div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="top-tabs">
+          <div class="chrome-tab active" data-go="receipt"><span>到货签收单</span><span>×</span></div>
+          <div class="chrome-tab" data-go="quality"><span>质检管理</span><span>×</span></div>
+          <div class="chrome-tab" data-go="exception"><span>异常待处理</span><span>×</span></div>
+        </div>
+        <div class="topbar-actions">
+          <select class="ghost-select">
+            <option>简体中文</option>
+          </select>
+          <select class="ghost-select" style="min-width: 205px;">
+            <option>印尼-雅加达-拣备仓-0176</option>
+          </select>
+          <div class="user-label">广东西之月网络科技有限公司-Martin</div>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <div class="status-tabs" id="statusTabs"></div>
+
+        <div class="filter-card">
+          <div class="filter-head">
+            <span>⚙</span>
+            <span>设置</span>
+          </div>
+
+          <div class="filter-grid" id="filterGrid">
+            <input class="field" placeholder="签收单号" />
+            <input class="field" placeholder="仓库" value="印尼-雅加达-拣备仓-0176" />
+            <input class="field" placeholder="物流单号" />
+            <input class="field" placeholder="包裹号/卡板号" />
+            <input class="field" placeholder="来源识别状态" />
+            <input class="field" placeholder="售后关联状态" />
+            <input class="field" placeholder="到货形态" />
+            <input class="field" placeholder="创建方式" />
+            <div class="date-range">
+              <input class="field" placeholder="开始时间" />
+              <span style="color:#a2acb9;">→</span>
+              <input class="field" placeholder="结束时间" />
+            </div>
+            <input class="field" placeholder="处理状态" />
+          </div>
+
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button class="btn primary" id="searchBtn">查询</button>
+              <button class="btn" id="resetBtn">重置</button>
+              <button class="btn strong" id="exportBtn">导出</button>
+              <button class="btn" data-modal="new">新建签收单</button>
+              <button class="btn" data-modal="relation">批量补关联</button>
+              <button class="btn" data-modal="exception">标记异常</button>
+            </div>
+            <div class="toolbar-right">
+              <button class="btn">另存为快捷查询</button>
+            </div>
+          </div>
+
+          <div class="collapse-row">
+            <div class="collapse-line"></div>
+            <button class="collapse-pill" id="collapseBtn">收起</button>
+            <div class="collapse-line"></div>
+          </div>
+        </div>
+
+        <div class="summary-strip">
+          <div class="summary-card">
+            <div class="summary-label">今日新增签收单</div>
+            <div class="summary-value">32</div>
+            <div class="summary-sub">人工创建 32 / OMS 预通知 0</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">待售后匹配</div>
+            <div class="summary-value">11</div>
+            <div class="summary-sub">其中阻断质检 5 单</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">待补关联</div>
+            <div class="summary-value">4</div>
+            <div class="summary-sub">物流单号多笔命中 2 单</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-label">异常待处理</div>
+            <div class="summary-value">3</div>
+            <div class="summary-sub">无法识别来源 1 / 信息缺失 2</div>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="checkbox-cell"><input class="checkbox" type="checkbox" id="checkAll" /></th>
+                  <th>签收单号</th>
+                  <th>仓库</th>
+                  <th>到货形态</th>
+                  <th>创建方式</th>
+                  <th>来源识别状态</th>
+                  <th>售后关联状态</th>
+                  <th>物流单号</th>
+                  <th>包裹号/卡板号</th>
+                  <th>SKU数量</th>
+                  <th>处理状态</th>
+                  <th>操作人</th>
+                  <th>更新时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="pagination">
+            <div class="pagination-left">
+              <span style="color:#9aa4b2;">‹</span>
+              <span class="page-chip">1</span>
+              <span>20条/页</span>
+              <span>总数：<strong id="totalCount">0</strong></span>
+            </div>
+            <div class="pagination-right">
+              <span>当前筛选：<strong id="currentFilter">全部</strong></span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="drawer" id="drawer">
+    <div class="drawer-head">
+      <span>签收单详情</span>
+      <button class="icon-btn" id="closeDrawer">×</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
+  <section class="modal" id="modal">
+    <div class="modal-head">
+      <span id="modalTitle">新建签收单</span>
+      <button class="icon-btn" id="closeModal">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot">
+      <button class="btn" id="cancelModal">取消</button>
+      <button class="btn primary" id="confirmModal">确认</button>
+    </div>
+  </section>
+
+  <script>
+    const rows = [
+      {
+        id: "DH20260619000001",
+        warehouse: "印尼-雅加达-拣备仓-0176",
+        arrivalType: "小包裹",
+        createType: "人工创建",
+        sourceState: "待售后匹配",
+        relationState: "未关联",
+        logisticsNo: "JKT-ASR-20260619-001",
+        carrierRef: "PKG-889201",
+        skuCount: "8个SKU / 23件",
+        processState: "待签收",
+        operator: "李婷婷",
+        updatedAt: "2026-06-19 10:25:18",
+        blockMode: "阻断质检",
+        owner: "收货组-早班",
+        note: "货到仓但 OMS 售后单未到，先挂待售后匹配",
+        timeline: [
+          "10:25 人工创建签收单",
+          "10:26 系统标记来源状态为待售后匹配",
+          "10:27 仓库策略判定为阻断质检"
+        ]
+      },
+      {
+        id: "DH20260619000002",
+        warehouse: "印尼-雅加达-拣备仓-0176",
+        arrivalType: "整卡板",
+        createType: "人工创建",
+        sourceState: "已识别为售后",
+        relationState: "已关联",
+        logisticsNo: "JKT-ASR-20260619-002",
+        carrierRef: "PALLET-1093",
+        skuCount: "21个SKU / 112件",
+        processState: "已签收",
+        operator: "陈子豪",
+        updatedAt: "2026-06-19 09:52:11",
+        blockMode: "放行质检",
+        owner: "收货组-早班",
+        note: "已关联售后单 AS202606190089，可继续质检",
+        timeline: [
+          "09:40 人工创建签收单",
+          "09:45 自动命中物流单号并完成售后关联",
+          "09:52 收货确认完成"
+        ]
+      },
+      {
+        id: "DH20260619000003",
+        warehouse: "印尼-雅加达-拣备仓-0176",
+        arrivalType: "混箱",
+        createType: "人工创建",
+        sourceState: "待补关联",
+        relationState: "待补关联",
+        logisticsNo: "JKT-ASR-20260619-003",
+        carrierRef: "MIX-4829",
+        skuCount: "11个SKU / 41件",
+        processState: "已签收",
+        operator: "王梦婷",
+        updatedAt: "2026-06-19 09:20:44",
+        blockMode: "放行质检",
+        owner: "仓内主管",
+        note: "同物流单号命中 2 笔售后记录，需要人工确认",
+        timeline: [
+          "09:10 创建签收单",
+          "09:12 系统命中多笔售后单",
+          "09:20 转为待补关联"
+        ]
+      },
+      {
+        id: "DH20260619000004",
+        warehouse: "印尼-雅加达-拣备仓-0176",
+        arrivalType: "托盘",
+        createType: "人工创建",
+        sourceState: "无法识别",
+        relationState: "未关联",
+        logisticsNo: "JKT-ASR-20260619-004",
+        carrierRef: "TRAY-7710",
+        skuCount: "5个SKU / 18件",
+        processState: "异常中止",
+        operator: "赵欣雨",
+        updatedAt: "2026-06-19 08:55:03",
+        blockMode: "阻断质检",
+        owner: "仓内主管",
+        note: "缺少售后单号与完整物流线索，已进入异常待处理",
+        timeline: [
+          "08:41 创建签收单",
+          "08:46 线索不足，无法识别来源",
+          "08:55 转入异常待处理"
+        ]
+      },
+      {
+        id: "DH20260619000005",
+        warehouse: "印尼-雅加达-拣备仓-0176",
+        arrivalType: "小包裹",
+        createType: "人工创建",
+        sourceState: "待售后匹配",
+        relationState: "未关联",
+        logisticsNo: "JKT-ASR-20260619-005",
+        carrierRef: "PKG-889356",
+        skuCount: "6个SKU / 12件",
+        processState: "待签收",
+        operator: "李婷婷",
+        updatedAt: "2026-06-19 08:32:19",
+        blockMode: "放行质检",
+        owner: "收货组-早班",
+        note: "仓库策略允许无售后单先流转到质检",
+        timeline: [
+          "08:32 创建签收单",
+          "08:33 标记待售后匹配",
+          "08:34 仓库策略判定为放行质检"
+        ]
+      },
+      {
+        id: "DH20260619000006",
+        warehouse: "印尼-雅加达-拣备仓-0176",
+        arrivalType: "整箱",
+        createType: "人工创建",
+        sourceState: "已识别为售后",
+        relationState: "已关联",
+        logisticsNo: "JKT-ASR-20260619-006",
+        carrierRef: "BOX-5501",
+        skuCount: "14个SKU / 55件",
+        processState: "已签收",
+        operator: "黄晨",
+        updatedAt: "2026-06-19 07:58:51",
+        blockMode: "放行质检",
+        owner: "收货组-夜班",
+        note: "售后关联完成，等待质检入库单生成",
+        timeline: [
+          "07:48 创建签收单",
+          "07:50 售后单自动关联",
+          "07:58 签收完成"
+        ]
+      }
+    ];
+
+    const tabs = [
+      { key: "all", label: "全部" },
+      { key: "待签收", label: "待签收" },
+      { key: "待售后匹配", label: "待售后匹配" },
+      { key: "已识别为售后", label: "已识别为售后", badge: 2 },
+      { key: "待补关联", label: "待补关联" },
+      { key: "无法识别", label: "无法识别" },
+      { key: "异常中止", label: "异常中止" }
+    ];
+
+    const modalTemplates = {
+      new: {
+        title: "新建签收单",
+        content: `
+          <div class="modal-grid">
+            <div class="modal-field"><div class="modal-label">仓库</div><select><option>印尼-雅加达-拣备仓-0176</option></select></div>
+            <div class="modal-field"><div class="modal-label">到货日期</div><input value="2026-06-19 11:00:00" /></div>
+            <div class="modal-field"><div class="modal-label">到货形态</div><select><option>小包裹</option><option>整卡板</option><option>托盘</option><option>整箱</option><option>混箱</option></select></div>
+            <div class="modal-field"><div class="modal-label">物流单号</div><input placeholder="请输入物流单号" /></div>
+            <div class="modal-field"><div class="modal-label">包裹号/卡板号</div><input placeholder="请输入包裹号或卡板号" /></div>
+            <div class="modal-field"><div class="modal-label">创建方式</div><input value="人工创建" /></div>
+            <div class="modal-field full"><div class="modal-label">备注</div><textarea placeholder="录入来源说明、异常线索或收货备注"></textarea></div>
+          </div>
+        `
+      },
+      relation: {
+        title: "批量补关联",
+        content: `
+          <div class="modal-grid">
+            <div class="modal-field"><div class="modal-label">售后单号</div><input placeholder="请输入售后单号" /></div>
+            <div class="modal-field"><div class="modal-label">原订单号</div><input placeholder="请输入原订单号" /></div>
+            <div class="modal-field"><div class="modal-label">物流单号</div><input value="JKT-ASR-20260619-003" /></div>
+            <div class="modal-field"><div class="modal-label">包裹号/卡板号</div><input value="MIX-4829" /></div>
+            <div class="modal-field"><div class="modal-label">仓库</div><select><option>印尼-雅加达-拣备仓-0176</option></select></div>
+            <div class="modal-field"><div class="modal-label">候选结果</div><select><option>命中 2 笔，需要人工确认唯一目标</option></select></div>
+            <div class="modal-field full"><div class="modal-label">处理意见</div><textarea>优先按物流单号匹配，如同号多笔，再结合到货日期、到货形态和卡板号二次定位。</textarea></div>
+          </div>
+        `
+      },
+      exception: {
+        title: "标记异常",
+        content: `
+          <div class="modal-grid">
+            <div class="modal-field"><div class="modal-label">异常类型</div><select><option>无法识别来源</option><option>物流单号重复</option><option>信息缺失</option></select></div>
+            <div class="modal-field"><div class="modal-label">处理策略</div><select><option>转异常待处理</option></select></div>
+            <div class="modal-field full"><div class="modal-label">异常原因</div><textarea>缺少售后单号，物流线索不足，暂无法确认来源。</textarea></div>
+            <div class="modal-field full"><div class="modal-label">补查建议</div><textarea>建议补查 OMS 售后单、TMS 运单回传和现场收货照片。</textarea></div>
+          </div>
+        `
+      }
+    };
+
+    const stateMeta = {
+      "待售后匹配": "orange",
+      "已识别为售后": "green",
+      "待补关联": "blue",
+      "无法识别": "red",
+      "待签收": "blue",
+      "已签收": "green",
+      "异常中止": "red",
+      "已关联": "green",
+      "未关联": "orange"
+    };
+
+    let activeTab = "all";
+    let selectedRowId = null;
+
+    const statusTabs = document.getElementById("statusTabs");
+    const tableBody = document.getElementById("tableBody");
+    const totalCount = document.getElementById("totalCount");
+    const currentFilter = document.getElementById("currentFilter");
+    const overlay = document.getElementById("overlay");
+    const drawer = document.getElementById("drawer");
+    const drawerBody = document.getElementById("drawerBody");
+    const modal = document.getElementById("modal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+    const filterGrid = document.getElementById("filterGrid");
+    const collapseBtn = document.getElementById("collapseBtn");
+
+    function renderTabs() {
+      statusTabs.innerHTML = tabs.map((tab) => {
+        const badge = tab.badge ? `<span class="status-badge">${tab.badge}</span>` : "";
+        return `<button class="status-tab ${activeTab === tab.key ? "active" : ""}" data-tab="${tab.key}">${tab.label}${badge}</button>`;
+      }).join("");
+    }
+
+    function getFilteredRows() {
+      if (activeTab === "all") return rows;
+      if (activeTab === "待签收" || activeTab === "异常中止") {
+        return rows.filter((row) => row.processState === activeTab);
+      }
+      return rows.filter((row) => row.sourceState === activeTab);
+    }
+
+    function tag(text) {
+      const cls = stateMeta[text] || "blue";
+      return `<span class="tag ${cls}">${text}</span>`;
+    }
+
+    function renderTable() {
+      const data = getFilteredRows();
+      totalCount.textContent = data.length;
+      currentFilter.textContent = activeTab === "all" ? "全部" : activeTab;
+
+      tableBody.innerHTML = data.map((row) => `
+        <tr class="${selectedRowId === row.id ? "selected" : ""}">
+          <td class="checkbox-cell"><input class="checkbox row-check" type="checkbox" data-id="${row.id}" ${selectedRowId === row.id ? "checked" : ""} /></td>
+          <td><a class="cell-link detail-link" data-id="${row.id}">${row.id}</a></td>
+          <td>${row.warehouse}</td>
+          <td>${row.arrivalType}</td>
+          <td>${tag(row.createType)}</td>
+          <td>${tag(row.sourceState)}</td>
+          <td>${tag(row.relationState)}</td>
+          <td>${row.logisticsNo}</td>
+          <td>${row.carrierRef}</td>
+          <td><a class="cell-link detail-link" data-id="${row.id}">${row.skuCount}</a></td>
+          <td>${tag(row.processState)}</td>
+          <td>${row.operator}</td>
+          <td>${row.updatedAt}</td>
+          <td>
+            <a class="cell-link detail-link" data-id="${row.id}">详情</a>
+            &nbsp;|&nbsp;
+            <a class="cell-link" data-modal="relation">补关联</a>
+            &nbsp;|&nbsp;
+            <a class="cell-link" data-modal="exception">标记异常</a>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function openDrawer(id) {
+      const row = rows.find((item) => item.id === id);
+      if (!row) return;
+
+      selectedRowId = id;
+      drawerBody.innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-item"><strong>签收单号</strong>${row.id}</div>
+          <div class="detail-item"><strong>仓库</strong>${row.warehouse}</div>
+          <div class="detail-item"><strong>到货形态</strong>${row.arrivalType}</div>
+          <div class="detail-item"><strong>创建方式</strong>${row.createType}</div>
+          <div class="detail-item"><strong>来源识别状态</strong>${tag(row.sourceState)}</div>
+          <div class="detail-item"><strong>售后关联状态</strong>${tag(row.relationState)}</div>
+          <div class="detail-item"><strong>物流单号</strong>${row.logisticsNo}</div>
+          <div class="detail-item"><strong>包裹号/卡板号</strong>${row.carrierRef}</div>
+          <div class="detail-item"><strong>SKU数量</strong>${row.skuCount}</div>
+          <div class="detail-item"><strong>仓库策略</strong>${tag(row.blockMode)}</div>
+          <div class="detail-item"><strong>当前处理状态</strong>${tag(row.processState)}</div>
+          <div class="detail-item"><strong>责任人</strong>${row.owner}</div>
+        </div>
+        <div class="detail-item"><strong>处理说明</strong>${row.note}</div>
+        <div>
+          <strong style="display:block;margin-bottom:10px;color:#7c8797;font-size:12px;">处理时间线</strong>
+          <div class="timeline">
+            ${row.timeline.map((item) => `<div class="timeline-item">${item}</div>`).join("")}
+          </div>
+        </div>
+      `;
+      overlay.classList.add("show");
+      drawer.classList.add("show");
+      renderTable();
+    }
+
+    function closeDrawer() {
+      drawer.classList.remove("show");
+      if (!modal.classList.contains("show")) {
+        overlay.classList.remove("show");
+      }
+    }
+
+    function openModal(type) {
+      const tpl = modalTemplates[type];
+      if (!tpl) return;
+      modalTitle.textContent = tpl.title;
+      modalBody.innerHTML = tpl.content;
+      overlay.classList.add("show");
+      modal.classList.add("show");
+    }
+
+    function closeModal() {
+      modal.classList.remove("show");
+      if (!drawer.classList.contains("show")) {
+        overlay.classList.remove("show");
+      }
+    }
+
+    renderTabs();
+    renderTable();
+
+    statusTabs.addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-tab]");
+      if (!btn) return;
+      activeTab = btn.dataset.tab;
+      renderTabs();
+      renderTable();
+    });
+
+    tableBody.addEventListener("click", (event) => {
+      const detail = event.target.closest(".detail-link");
+      if (detail) {
+        openDrawer(detail.dataset.id);
+        return;
+      }
+
+      const actionModal = event.target.closest("[data-modal]");
+      if (actionModal) {
+        openModal(actionModal.dataset.modal);
+      }
+    });
+
+    document.querySelectorAll("[data-modal]").forEach((button) => {
+      button.addEventListener("click", () => openModal(button.dataset.modal));
+    });
+
+    document.getElementById("closeDrawer").addEventListener("click", closeDrawer);
+    document.getElementById("closeModal").addEventListener("click", closeModal);
+    document.getElementById("cancelModal").addEventListener("click", closeModal);
+    overlay.addEventListener("click", () => {
+      closeDrawer();
+      closeModal();
+    });
+
+    document.getElementById("confirmModal").addEventListener("click", () => {
+      closeModal();
+      alert(`${modalTitle.textContent}：原型动作已触发，用于展示页面交互，不写入真实数据。`);
+    });
+
+    collapseBtn.addEventListener("click", () => {
+      const hidden = filterGrid.classList.toggle("hidden");
+      collapseBtn.textContent = hidden ? "展开" : "收起";
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      document.querySelectorAll(".field").forEach((input) => {
+        if (input.hasAttribute("value")) return;
+        input.value = "";
+      });
+      alert("筛选条件已重置。");
+    });
+
+    document.getElementById("searchBtn").addEventListener("click", () => {
+      alert("已按当前筛选条件执行查询。");
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      alert("已触发导出动作。");
+    });
+
+    document.getElementById("checkAll").addEventListener("change", (event) => {
+      const checked = event.target.checked;
+      document.querySelectorAll(".row-check").forEach((checkbox) => {
+        checkbox.checked = checked;
+      });
+    });
+  </script>
+</body>
+</html>

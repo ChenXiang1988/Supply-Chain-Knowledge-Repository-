@@ -1,0 +1,1434 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>xyWMS 售后到货入库原型 - 异常待处理工作台</title>
+  <style>
+    :root {
+      --nav-bg: #23254b;
+      --nav-bg-2: #1d2041;
+      --nav-active: #2e5bff;
+      --nav-active-soft: #2b3d74;
+      --page-bg: #f5f7fb;
+      --card-bg: #ffffff;
+      --line: #e4eaf3;
+      --line-2: #d7dfec;
+      --text: #1f2a44;
+      --muted: #7b8798;
+      --blue: #2f7df6;
+      --blue-deep: #2f5eff;
+      --green-text: #30a142;
+      --orange-text: #d48806;
+      --red-text: #cf1322;
+      --gray-text: #7d8592;
+      --shadow: 0 10px 28px rgba(20, 37, 63, 0.08);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--text);
+      background: var(--page-bg);
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    .app {
+      display: grid;
+      grid-template-columns: 176px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, var(--nav-bg) 0%, var(--nav-bg-2) 100%);
+      color: rgba(255, 255, 255, 0.86);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .brand {
+      height: 66px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .brand-mark {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      background: linear-gradient(180deg, #3dd8ff 0%, #276bff 100%);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+    }
+
+    .nav-group { padding-top: 10px; }
+
+    .nav-item, .nav-subitem {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      font-size: 14px;
+      cursor: default;
+    }
+
+    .nav-item-label, .nav-subitem-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+    }
+
+    .nav-sublist { background: rgba(13, 17, 34, 0.14); }
+
+    .nav-subitem {
+      padding-left: 48px;
+      color: rgba(255, 255, 255, 0.74);
+    }
+
+    .nav-subitem.active {
+      background: var(--nav-active-soft);
+      color: #ffffff;
+      box-shadow: inset 3px 0 0 var(--nav-active);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px 12px;
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 12px;
+    }
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .topbar {
+      height: 44px;
+      background: #f0f0f0;
+      border-bottom: 1px solid #e6e6e6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px 0 10px;
+      gap: 12px;
+    }
+
+    .top-tabs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .chrome-tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 34px;
+      padding: 0 14px;
+      border-radius: 8px 8px 0 0;
+      background: #e5e5e5;
+      color: #6a7380;
+      font-size: 14px;
+    }
+
+    .chrome-tab.active {
+      background: #ffffff;
+      color: var(--text);
+      box-shadow: 0 -1px 0 #ffffff, 0 0 0 1px #e6e6e6;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .ghost-select {
+      min-width: 108px;
+      height: 28px;
+      border: 1px solid #d8d8d8;
+      background: #ffffff;
+      border-radius: 4px;
+      padding: 0 10px;
+      color: #444;
+    }
+
+    .user-label {
+      color: #555;
+      font-size: 13px;
+    }
+
+    .workspace {
+      padding: 12px 18px 20px;
+      min-width: 0;
+    }
+
+    .status-tabs {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 8px;
+    }
+
+    .status-tab {
+      position: relative;
+      min-width: 88px;
+      height: 30px;
+      border: 1px solid #d8dee8;
+      border-right: 0;
+      background: #fafbfd;
+      color: #3c4858;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .status-tab:first-child { border-radius: 4px 0 0 4px; }
+
+    .status-tab:last-child {
+      border-right: 1px solid #d8dee8;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .status-tab.active {
+      background: var(--blue);
+      color: #ffffff;
+      border-color: var(--blue);
+      z-index: 1;
+    }
+
+    .status-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      background: #ff5d5d;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 11px;
+      line-height: 18px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(255, 93, 93, 0.3);
+    }
+
+    .filter-card, .table-card {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .filter-card { padding: 12px 18px 16px; }
+
+    .filter-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      color: #555;
+      font-size: 13px;
+      gap: 12px;
+    }
+
+    .rule-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 14px;
+      background: #fff7e8;
+      color: #b76a00;
+      border: 1px solid #ffd591;
+      font-size: 12px;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 10px;
+      align-items: center;
+    }
+
+    .filter-grid.hidden { display: none; }
+
+    .field {
+      height: 30px;
+      border: 1px solid var(--line-2);
+      border-radius: 4px;
+      padding: 0 12px;
+      background: #ffffff;
+      color: #4a5568;
+      min-width: 0;
+    }
+
+    .field::placeholder { color: #b3bac5; }
+
+    .date-range {
+      grid-column: span 2;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .date-range .field {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .toolbar {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-left, .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      height: 30px;
+      border-radius: 4px;
+      border: 1px solid var(--line-2);
+      background: #ffffff;
+      color: #3c4858;
+      padding: 0 16px;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #ffffff;
+    }
+
+    .btn.warn {
+      background: #fff7e8;
+      border-color: #ffd591;
+      color: #b76a00;
+    }
+
+    .btn.danger {
+      background: #fff1f0;
+      border-color: #ffa39e;
+      color: #cf1322;
+    }
+
+    .collapse-row {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: var(--blue);
+      font-size: 12px;
+    }
+
+    .collapse-line {
+      flex: 1;
+      height: 2px;
+      background: #b8d1ff;
+    }
+
+    .collapse-pill {
+      min-width: 60px;
+      height: 26px;
+      border: 0;
+      border-radius: 14px;
+      background: var(--blue);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .summary-strip {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .summary-card {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px 16px;
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .summary-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .summary-sub {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #6e7a8b;
+    }
+
+    .table-card {
+      margin-top: 20px;
+      overflow: hidden;
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1520px;
+    }
+
+    thead th {
+      height: 40px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      color: #5c6675;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: left;
+      padding: 0 10px;
+      white-space: nowrap;
+    }
+
+    tbody td {
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      padding: 8px 10px;
+      font-size: 13px;
+      vertical-align: top;
+      background: #ffffff;
+    }
+
+    tbody tr:hover td { background: #f7fbff; }
+    tbody tr.selected td { background: #f1f7ff; }
+
+    .checkbox-cell {
+      width: 34px;
+      text-align: center;
+    }
+
+    .checkbox {
+      width: 16px;
+      height: 16px;
+      border: 1px solid #d3dce8;
+      border-radius: 2px;
+      appearance: none;
+      background: #fff;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .checkbox:checked {
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .checkbox:checked::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 1px;
+      width: 4px;
+      height: 8px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .cell-link {
+      color: #1f6fff;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .cell-link:hover { text-decoration: underline; }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 0 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 20px;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+
+    .tag.blue { color: #1d5fd0; background: #edf5ff; border-color: #b9d6ff; }
+    .tag.green { color: var(--green-text); background: #f2fff0; border-color: #b7ebb0; }
+    .tag.orange { color: var(--orange-text); background: #fff7e8; border-color: #ffd591; }
+    .tag.red { color: var(--red-text); background: #fff1f0; border-color: #ffa39e; }
+    .tag.gray { color: var(--gray-text); background: #f4f5f7; border-color: #d9dce1; }
+
+    .mono {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      letter-spacing: 0.2px;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 12px;
+      font-size: 13px;
+      color: #4e5969;
+      background: #ffffff;
+    }
+
+    .pagination-left, .pagination-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .page-chip {
+      min-width: 22px;
+      height: 22px;
+      border: 1px solid #2f7df6;
+      border-radius: 4px;
+      color: #2f7df6;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(16, 24, 40, 0.32);
+      display: none;
+      z-index: 20;
+    }
+
+    .overlay.show { display: block; }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 500px;
+      height: 100vh;
+      background: #ffffff;
+      box-shadow: -12px 0 30px rgba(15, 23, 42, 0.16);
+      transform: translateX(100%);
+      transition: transform 0.24s ease;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .drawer.show { transform: translateX(0); }
+
+    .drawer-head, .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+    }
+
+    .drawer-body {
+      padding: 18px;
+      overflow: auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 12px;
+    }
+
+    .detail-item {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fafbfd;
+    }
+
+    .detail-item strong,
+    .section-title {
+      display: block;
+      font-size: 12px;
+      color: #7c8797;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .detail-table {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .detail-table th,
+    .detail-table td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      font-size: 12px;
+      background: #fff;
+    }
+
+    .timeline {
+      border-left: 2px solid #d8e2f0;
+      padding-left: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .timeline-item {
+      position: relative;
+      font-size: 13px;
+      color: #536172;
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: -20px;
+      top: 6px;
+      width: 8px;
+      height: 8px;
+      background: var(--blue);
+      border-radius: 50%;
+    }
+
+    .clue-box {
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      background: #fafcff;
+      padding: 12px;
+    }
+
+    .drawer-row {
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      gap: 10px;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+
+    .drawer-label {
+      color: #617185;
+      font-size: 13px;
+      padding-top: 6px;
+    }
+
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 760px;
+      max-width: calc(100vw - 32px);
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+      transform: translate(-50%, -46%);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.22s ease;
+      z-index: 40;
+    }
+
+    .modal.show {
+      transform: translate(-50%, -50%);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-body {
+      padding: 18px;
+      max-height: 68vh;
+      overflow: auto;
+      display: grid;
+      gap: 14px;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .modal-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: #fafbfd;
+    }
+
+    .modal-card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .candidate-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .candidate-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .modal-foot {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 14px 18px 18px;
+      border-top: 1px solid var(--line);
+    }
+
+    .close-btn {
+      border: 0;
+      background: transparent;
+      font-size: 20px;
+      color: #98a2b3;
+      cursor: pointer;
+    }
+
+    .subtle {
+      color: #768396;
+      font-size: 12px;
+    }
+
+    @media (max-width: 1440px) {
+      .filter-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .summary-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark"></span>
+        <span>WMS系统</span>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-item">
+          <span class="nav-item-label"><span class="nav-dot"></span>作业策略</span>
+          <span>﹀</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-item-label"><span class="nav-dot"></span>规则管理</span>
+          <span>﹀</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-item-label"><span class="nav-dot"></span>首页</span>
+          <span>﹀</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-item-label"><span class="nav-dot"></span>基础数据</span>
+          <span>﹀</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-item-label"><span class="nav-dot"></span>基础配置</span>
+          <span>﹀</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-item-label"><span class="nav-dot"></span>入库</span>
+          <span>︿</span>
+        </div>
+        <div class="nav-sublist">
+          <div class="nav-subitem">
+            <span class="nav-subitem-label">到货通知单</span>
+          </div>
+          <div class="nav-subitem">
+            <span class="nav-subitem-label">质检管理</span>
+          </div>
+          <div class="nav-subitem">
+            <span class="nav-subitem-label">上架单</span>
+          </div>
+          <div class="nav-subitem active">
+            <span class="nav-subitem-label">异常待处理</span>
+          </div>
+        </div>
+        <div class="nav-item">
+          <span class="nav-item-label"><span class="nav-dot"></span>出库</span>
+          <span>﹀</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-item-label"><span class="nav-dot"></span>库存中心</span>
+          <span>﹀</span>
+        </div>
+        <div class="nav-item">
+          <span class="nav-item-label"><span class="nav-dot"></span>系统管理</span>
+          <span>﹀</span>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">版本号：v1.0.0.2025.0214</div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div class="top-tabs">
+          <div class="chrome-tab">数据看板 ×</div>
+          <div class="chrome-tab">到货签收单 ×</div>
+          <div class="chrome-tab active">异常待处理工作台 ×</div>
+        </div>
+        <div class="topbar-actions">
+          <select class="ghost-select">
+            <option>简体中文</option>
+          </select>
+          <select class="ghost-select" style="min-width: 206px;">
+            <option>印尼-雅加达-拣备仓-0176</option>
+          </select>
+          <span class="user-label">广东西之月网络科技有限公司-Martin</span>
+        </div>
+      </div>
+
+      <div class="workspace">
+        <div id="statusTabs" class="status-tabs"></div>
+
+        <section class="filter-card">
+          <div class="filter-head">
+            <span class="rule-note">处理规则：先补查，再补关联，无法唯一定位时保持异常或手工关闭</span>
+            <span>设置</span>
+          </div>
+
+          <div id="filterGrid" class="filter-grid">
+            <input class="field" placeholder="异常单号 / 签收单号" />
+            <select class="field">
+              <option>全部异常类型</option>
+              <option>无法识别</option>
+              <option>未匹配售后</option>
+              <option>单号冲突</option>
+              <option>信息缺失</option>
+            </select>
+            <select class="field">
+              <option>广东二月售后仓</option>
+              <option>全部仓库</option>
+            </select>
+            <select class="field">
+              <option>全部来源状态</option>
+              <option>待售后匹配</option>
+              <option>已识别为售后</option>
+              <option>无法识别</option>
+            </select>
+            <select class="field">
+              <option>全部处理状态</option>
+              <option>待补查</option>
+              <option>待补关联</option>
+              <option>保持异常</option>
+              <option>已关闭</option>
+            </select>
+            <select class="field">
+              <option>是否已补关联：全部</option>
+              <option>是</option>
+              <option>否</option>
+            </select>
+            <select class="field">
+              <option>全部到货形态</option>
+              <option>整箱到货</option>
+              <option>散件到货</option>
+              <option>混箱到货</option>
+            </select>
+            <div class="date-range">
+              <input class="field" placeholder="开始时间" />
+              <span>→</span>
+              <input class="field" placeholder="结束时间" />
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <div class="toolbar-left">
+              <button id="investigateBtn" class="btn primary" data-modal="investigate">补查</button>
+              <button id="bindBtn" class="btn warn" data-modal="bind">补关联</button>
+              <button id="closeIssueBtn" class="btn danger" data-modal="closeIssue">关闭异常</button>
+              <button id="retryBtn" class="btn">重新匹配</button>
+            </div>
+            <div class="toolbar-right">
+              <button id="searchBtn" class="btn primary">查询</button>
+              <button id="resetBtn" class="btn">重置</button>
+              <button class="btn">导出</button>
+            </div>
+          </div>
+
+          <div class="collapse-row">
+            <div class="collapse-line"></div>
+            <button id="collapseBtn" class="collapse-pill">收起</button>
+            <div class="collapse-line"></div>
+          </div>
+        </section>
+
+        <section class="summary-strip">
+          <article class="summary-card">
+            <div class="summary-label">当前筛选结果</div>
+            <div class="summary-value" id="totalCount">0</div>
+            <div class="summary-sub">当前状态：<span id="currentFilter">全部</span></div>
+          </article>
+          <article class="summary-card">
+            <div class="summary-label">待补查</div>
+            <div class="summary-value">4</div>
+            <div class="summary-sub">优先看物流单号、包裹号、卡板号线索</div>
+          </article>
+          <article class="summary-card">
+            <div class="summary-label">待补关联</div>
+            <div class="summary-value">3</div>
+            <div class="summary-sub">已命中候选对象，等待人工确认唯一目标</div>
+          </article>
+          <article class="summary-card">
+            <div class="summary-label">保持异常</div>
+            <div class="summary-value">2</div>
+            <div class="summary-sub">当前仍无法唯一定位，不能自动放行</div>
+          </article>
+        </section>
+
+        <section class="table-card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="checkbox-cell"><input id="checkAll" class="checkbox" type="checkbox" /></th>
+                  <th>异常单号</th>
+                  <th>关联签收单号</th>
+                  <th>异常类型</th>
+                  <th>异常原因</th>
+                  <th>线索信息</th>
+                  <th>处理状态</th>
+                  <th>是否已补关联</th>
+                  <th>处理人</th>
+                  <th>更新时间</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="pagination">
+            <div class="pagination-left">
+              <span class="page-chip">1</span>
+              <span>20条/页</span>
+            </div>
+            <div class="pagination-right">
+              <span>总数：<strong id="footerCount">0</strong></span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="overlay" class="overlay"></div>
+
+  <aside id="drawer" class="drawer">
+    <div class="drawer-head">
+      <span>异常详情</span>
+      <button id="closeDrawer" class="close-btn">×</button>
+    </div>
+    <div id="drawerBody" class="drawer-body"></div>
+  </aside>
+
+  <div id="modal" class="modal">
+    <div class="modal-head">
+      <span id="modalTitle">操作窗口</span>
+      <button id="closeModal" class="close-btn">×</button>
+    </div>
+    <div id="modalBody" class="modal-body"></div>
+    <div class="modal-foot">
+      <button id="cancelModal" class="btn">取消</button>
+      <button id="confirmModal" class="btn primary">确认</button>
+    </div>
+  </div>
+
+  <script>
+    const tabs = [
+      { key: "all", label: "全部" },
+      { key: "待补查", label: "待补查" },
+      { key: "待补关联", label: "待补关联" },
+      { key: "保持异常", label: "保持异常", badge: 2 },
+      { key: "已关闭", label: "已关闭" }
+    ];
+
+    const stateMeta = {
+      "待补查": "blue",
+      "待补关联": "orange",
+      "已识别为售后": "green",
+      "保持异常": "red",
+      "已关闭": "gray",
+      "是": "green",
+      "否": "red",
+      "无法识别": "red",
+      "未匹配售后": "orange",
+      "单号冲突": "red",
+      "信息缺失": "blue"
+    };
+
+    const rows = [
+      {
+        id: "EX202606200001",
+        receiptId: "-",
+        type: "无法识别",
+        reason: "物流单号存在，但 OMS 与 TMS 都未命中售后来源。",
+        clue: "物流单号 SF89001123 / 包裹号 PK-22019 / 卡板号 -",
+        processState: "待补查",
+        bound: "否",
+        owner: "仓内主管-王然",
+        updatedAt: "2026-06-20 09:18",
+        sourceState: "无法识别",
+        arrivalType: "散件到货",
+        note: "需要先补查 OMS 与 TMS 线索，不能直接放行到质检。",
+        candidates: [
+          ["AS202606180117", "售后单", "命中原订单号，时间接近，需人工核验"],
+          ["DH202606180054", "签收单", "同仓库、同物流单号，仍缺少包裹号"],
+          ["无唯一结果", "系统结论", "当前无法自动补关联"]
+        ],
+        timeline: [
+          "2026-06-20 08:56 收货后识别失败，自动转异常池",
+          "2026-06-20 09:02 首次自动补查无结果",
+          "2026-06-20 09:18 等待主管人工补查"
+        ]
+      },
+      {
+        id: "EX202606200002",
+        receiptId: "DH202606180063",
+        type: "未匹配售后",
+        reason: "签收单已落库，但售后单号为空，无法完成来源闭环。",
+        clue: "物流单号 YT22067112 / 包裹号 BG-0912 / 原订单号 SO-220771",
+        processState: "待补关联",
+        bound: "否",
+        owner: "仓内主管-王然",
+        updatedAt: "2026-06-20 09:42",
+        sourceState: "待售后匹配",
+        arrivalType: "整箱到货",
+        note: "已命中两笔售后候选，需要主管选定唯一目标后补关联。",
+        candidates: [
+          ["AS202606180209", "售后单", "售后创建时间与签收时间一致"],
+          ["AS202606180215", "售后单", "SKU 一致但仓库不同，需要排除"],
+          ["DH202606180063", "签收单", "当前异常关联主单"]
+        ],
+        timeline: [
+          "2026-06-20 09:31 系统识别到候选售后单 2 笔",
+          "2026-06-20 09:35 状态转为待补关联",
+          "2026-06-20 09:42 等待人工确认"
+        ]
+      },
+      {
+        id: "EX202606200003",
+        receiptId: "DH202606180071",
+        type: "单号冲突",
+        reason: "同一包裹号在两个签收单中重复出现，无法自动归属。",
+        clue: "包裹号 PK-00971 / 卡板号 PL-881 / 物流单号 ZT771500",
+        processState: "保持异常",
+        bound: "否",
+        owner: "仓内主管-周浩",
+        updatedAt: "2026-06-20 10:06",
+        sourceState: "待售后匹配",
+        arrivalType: "混箱到货",
+        note: "当前冲突未解决，继续补查前不得补关联。",
+        candidates: [
+          ["DH202606180071", "签收单", "当前单据"],
+          ["DH202606180072", "签收单", "同包裹号冲突单据"],
+          ["需人工拆分", "处理建议", "先补查再决定是否关闭"]
+        ],
+        timeline: [
+          "2026-06-20 09:58 系统发现包裹号重复",
+          "2026-06-20 10:01 自动匹配中止",
+          "2026-06-20 10:06 状态保持异常"
+        ]
+      },
+      {
+        id: "EX202606190028",
+        receiptId: "DH202606170038",
+        type: "信息缺失",
+        reason: "收货时未录入包裹号，无法通过包裹维度核验来源。",
+        clue: "物流单号 SF88770109 / 包裹号 - / 原订单号 SO-219981",
+        processState: "已关闭",
+        bound: "是",
+        owner: "仓内主管-陈思",
+        updatedAt: "2026-06-19 18:31",
+        sourceState: "已识别为售后",
+        arrivalType: "散件到货",
+        note: "主管确认补录原订单号并完成补关联后，手工关闭异常。",
+        candidates: [
+          ["AS202606170103", "售后单", "已确认唯一命中"],
+          ["DH202606170038", "签收单", "补关联完成"]
+        ],
+        timeline: [
+          "2026-06-19 18:12 补查 OMS 命中唯一售后单",
+          "2026-06-19 18:18 完成补关联",
+          "2026-06-19 18:31 主管关闭异常"
+        ]
+      },
+      {
+        id: "EX202606190031",
+        receiptId: "DH202606170051",
+        type: "未匹配售后",
+        reason: "TMS 回传物流单与 OMS 售后单仓库不一致。",
+        clue: "物流单号 JDL-620177 / 包裹号 BG-1002 / 原订单号 SO-220001",
+        processState: "待补查",
+        bound: "否",
+        owner: "仓内主管-周浩",
+        updatedAt: "2026-06-20 08:44",
+        sourceState: "待售后匹配",
+        arrivalType: "整箱到货",
+        note: "需确认是仓库配置错误还是物流单回传错误。",
+        candidates: [
+          ["AS202606170221", "售后单", "仓库不一致"],
+          ["TMS轨迹记录", "外部线索", "揽收仓显示为广州 02 仓"]
+        ],
+        timeline: [
+          "2026-06-20 08:30 自动匹配命中跨仓售后单",
+          "2026-06-20 08:33 系统阻断自动关联",
+          "2026-06-20 08:44 等待主管补查"
+        ]
+      },
+      {
+        id: "EX202606190036",
+        receiptId: "DH202606170064",
+        type: "无法识别",
+        reason: "卡板号无效，且物流单号为空，当前线索不足。",
+        clue: "物流单号 - / 包裹号 - / 卡板号 PL-0000",
+        processState: "待补关联",
+        bound: "否",
+        owner: "仓内主管-王然",
+        updatedAt: "2026-06-20 10:16",
+        sourceState: "无法识别",
+        arrivalType: "混箱到货",
+        note: "已通过人工盘点找到候选签收单，等待确认补关联。",
+        candidates: [
+          ["DH202606170064", "签收单", "同卡板作业批次"],
+          ["AS202606170245", "售后单", "SKU 组合一致"],
+          ["DH202606170067", "签收单", "同时间段候选"]
+        ],
+        timeline: [
+          "2026-06-20 09:41 库内人工比对 SKU 组合",
+          "2026-06-20 10:02 补查结果返回 3 个候选",
+          "2026-06-20 10:16 状态转为待补关联"
+        ]
+      }
+    ];
+
+    const modalTemplates = {
+      investigate: {
+        title: "补查线索",
+        content: `
+          <div class="modal-grid">
+            <div class="modal-card">
+              <strong>补查条件</strong>
+              <div class="drawer-row"><div class="drawer-label">物流单号</div><input class="field" value="SF89001123" /></div>
+              <div class="drawer-row"><div class="drawer-label">售后单号</div><input class="field" placeholder="输入售后单号" /></div>
+              <div class="drawer-row"><div class="drawer-label">原订单号</div><input class="field" value="SO-220771" /></div>
+              <div class="drawer-row"><div class="drawer-label">包裹号/卡板号</div><input class="field" value="PK-22019" /></div>
+            </div>
+            <div class="modal-card">
+              <strong>查询说明</strong>
+              <div>会同时查询 OMS、TMS 和当前 WMS 线索。</div>
+              <div>查询条件不能为空。</div>
+              <div class="subtle">补查只返回线索，不直接改业务状态。</div>
+            </div>
+          </div>
+        `
+      },
+      bind: {
+        title: "补关联候选确认",
+        content: `
+          <div class="candidate-list">
+            <div class="candidate-item">
+              <strong>候选 1：AS202606180209</strong>
+              <div>匹配原因：售后创建时间一致，SKU 组合完全匹配</div>
+              <div>关联签收单：DH202606180063</div>
+            </div>
+            <div class="candidate-item">
+              <strong>候选 2：AS202606180215</strong>
+              <div>匹配原因：SKU 一致，但仓库不同</div>
+              <div>风险：跨仓来源，需人工排除</div>
+            </div>
+          </div>
+          <div class="subtle">命中多笔时必须人工确认唯一目标后再补关联。</div>
+        `
+      },
+      closeIssue: {
+        title: "关闭异常",
+        content: `
+          <div class="modal-grid">
+            <div class="modal-card">
+              <strong>关闭原因</strong>
+              <select class="field">
+                <option>请选择关闭原因</option>
+                <option>确认无法定位来源</option>
+                <option>线索无效，终止处理</option>
+                <option>重复异常，保留主记录</option>
+              </select>
+            </div>
+            <div class="modal-card">
+              <strong>处理意见</strong>
+              <textarea class="field" style="height:100px;padding:10px 12px;resize:none;" placeholder="关闭异常前建议填写处理意见"></textarea>
+            </div>
+          </div>
+          <div class="subtle">关闭原因必填，关闭后该记录不再自动参与补查。</div>
+        `
+      }
+    };
+
+    let activeTab = "all";
+    let selectedRowId = rows[0].id;
+
+    const statusTabs = document.getElementById("statusTabs");
+    const tableBody = document.getElementById("tableBody");
+    const totalCount = document.getElementById("totalCount");
+    const footerCount = document.getElementById("footerCount");
+    const currentFilter = document.getElementById("currentFilter");
+    const overlay = document.getElementById("overlay");
+    const drawer = document.getElementById("drawer");
+    const drawerBody = document.getElementById("drawerBody");
+    const modal = document.getElementById("modal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+    const filterGrid = document.getElementById("filterGrid");
+    const collapseBtn = document.getElementById("collapseBtn");
+
+    function renderTabs() {
+      statusTabs.innerHTML = tabs.map((tab) => {
+        const badge = tab.badge ? `<span class="status-badge">${tab.badge}</span>` : "";
+        return `<button class="status-tab ${activeTab === tab.key ? "active" : ""}" data-tab="${tab.key}">${tab.label}${badge}</button>`;
+      }).join("");
+    }
+
+    function getFilteredRows() {
+      if (activeTab === "all") return rows;
+      return rows.filter((row) => row.processState === activeTab);
+    }
+
+    function tag(text) {
+      const cls = stateMeta[text] || "blue";
+      return `<span class="tag ${cls}">${text}</span>`;
+    }
+
+    function renderTable() {
+      const data = getFilteredRows();
+      totalCount.textContent = data.length;
+      footerCount.textContent = data.length;
+      currentFilter.textContent = activeTab === "all" ? "全部" : activeTab;
+
+      tableBody.innerHTML = data.map((row) => `
+        <tr class="${selectedRowId === row.id ? "selected" : ""}">
+          <td class="checkbox-cell"><input class="checkbox row-check" type="checkbox" data-id="${row.id}" ${selectedRowId === row.id ? "checked" : ""} /></td>
+          <td><a class="cell-link detail-link" data-id="${row.id}">${row.id}</a></td>
+          <td>${row.receiptId === "-" ? "-" : row.receiptId}</td>
+          <td>${tag(row.type)}</td>
+          <td>${row.reason}</td>
+          <td class="mono">${row.clue}</td>
+          <td>${tag(row.processState)}</td>
+          <td>${tag(row.bound)}</td>
+          <td>${row.owner}</td>
+          <td>${row.updatedAt}</td>
+          <td>
+            <a class="cell-link detail-link" data-id="${row.id}">详情</a>
+            &nbsp;|&nbsp;
+            <a class="cell-link" data-action="investigate" data-id="${row.id}">补查</a>
+            &nbsp;|&nbsp;
+            <a class="cell-link" data-action="bind" data-id="${row.id}">补关联</a>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function openDrawer(id) {
+      const row = rows.find((item) => item.id === id);
+      if (!row) return;
+
+      selectedRowId = id;
+      drawerBody.innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-item"><strong>异常单号</strong>${row.id}</div>
+          <div class="detail-item"><strong>关联签收单号</strong>${row.receiptId}</div>
+          <div class="detail-item"><strong>异常类型</strong>${tag(row.type)}</div>
+          <div class="detail-item"><strong>来源识别状态</strong>${tag(row.sourceState)}</div>
+          <div class="detail-item"><strong>处理状态</strong>${tag(row.processState)}</div>
+          <div class="detail-item"><strong>是否已补关联</strong>${tag(row.bound)}</div>
+          <div class="detail-item"><strong>到货形态</strong>${row.arrivalType}</div>
+          <div class="detail-item"><strong>处理人</strong>${row.owner}</div>
+          <div class="detail-item"><strong>更新时间</strong>${row.updatedAt}</div>
+          <div class="detail-item"><strong>线索摘要</strong>${row.clue}</div>
+        </div>
+
+        <div class="detail-item">
+          <strong>异常原因摘要</strong>
+          ${row.reason}
+        </div>
+
+        <div class="clue-box">
+          <strong class="section-title">线索比对</strong>
+          <table class="detail-table">
+            <thead>
+              <tr>
+                <th>候选对象</th>
+                <th>类型</th>
+                <th>说明</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${row.candidates.map((item) => `
+                <tr>
+                  <td>${item[0]}</td>
+                  <td>${item[1]}</td>
+                  <td>${item[2]}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="detail-item">
+          <strong>处理意见</strong>
+          ${row.note}
+        </div>
+
+        <div>
+          <strong class="section-title">处理时间线</strong>
+          <div class="timeline">
+            ${row.timeline.map((item) => `<div class="timeline-item">${item}</div>`).join("")}
+          </div>
+        </div>
+      `;
+
+      overlay.classList.add("show");
+      drawer.classList.add("show");
+      renderTable();
+    }
+
+    function closeDrawer() {
+      drawer.classList.remove("show");
+      if (!modal.classList.contains("show")) {
+        overlay.classList.remove("show");
+      }
+    }
+
+    function openModal(type) {
+      const tpl = modalTemplates[type];
+      if (!tpl) return;
+      modalTitle.textContent = tpl.title;
+      modalBody.innerHTML = tpl.content;
+      overlay.classList.add("show");
+      modal.classList.add("show");
+    }
+
+    function closeModal() {
+      modal.classList.remove("show");
+      if (!drawer.classList.contains("show")) {
+        overlay.classList.remove("show");
+      }
+    }
+
+    renderTabs();
+    renderTable();
+
+    statusTabs.addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-tab]");
+      if (!btn) return;
+      activeTab = btn.dataset.tab;
+      renderTabs();
+      renderTable();
+    });
+
+    tableBody.addEventListener("click", (event) => {
+      const detail = event.target.closest(".detail-link");
+      if (detail) {
+        openDrawer(detail.dataset.id);
+        return;
+      }
+
+      const action = event.target.closest("[data-action]");
+      if (action) {
+        selectedRowId = action.dataset.id;
+        renderTable();
+        openModal(action.dataset.action);
+      }
+    });
+
+    document.querySelectorAll("[data-modal]").forEach((button) => {
+      button.addEventListener("click", () => openModal(button.dataset.modal));
+    });
+
+    document.getElementById("closeDrawer").addEventListener("click", closeDrawer);
+    document.getElementById("closeModal").addEventListener("click", closeModal);
+    document.getElementById("cancelModal").addEventListener("click", closeModal);
+    overlay.addEventListener("click", () => {
+      closeDrawer();
+      closeModal();
+    });
+
+    document.getElementById("confirmModal").addEventListener("click", () => {
+      closeModal();
+      alert(`${modalTitle.textContent}：原型动作已触发，用于展示页面交互，不写入真实后端数据。`);
+    });
+
+    collapseBtn.addEventListener("click", () => {
+      const hidden = filterGrid.classList.toggle("hidden");
+      collapseBtn.textContent = hidden ? "展开" : "收起";
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      document.querySelectorAll(".field").forEach((input) => {
+        if (input.tagName === "SELECT") return;
+        if (input.hasAttribute("value")) return;
+        input.value = "";
+      });
+      alert("筛选条件已重置。");
+    });
+
+    document.getElementById("searchBtn").addEventListener("click", () => {
+      alert("已按当前筛选条件执行查询。");
+    });
+
+    document.getElementById("retryBtn").addEventListener("click", () => {
+      alert("已触发重新匹配。系统会按当前线索重新执行匹配，但不会自动跨过人工确认。");
+    });
+
+    document.getElementById("checkAll").addEventListener("change", (event) => {
+      const checked = event.target.checked;
+      document.querySelectorAll(".row-check").forEach((checkbox) => {
+        checkbox.checked = checked;
+      });
+    });
+  </script>
+</body>
+</html>
